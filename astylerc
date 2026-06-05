@@ -1,0 +1,6 @@
+# Force tabs for indentation
+indent=tab=4
+
+# Keep case labels aligned with the switch block
+indent-switches
+
