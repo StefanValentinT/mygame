@@ -1,4 +1,4 @@
-#if INTERFACE
+#Imports
 
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
@@ -8,13 +8,13 @@
 #include <stdbool.h>
 #include <cglm/cglm.h>
 
+#Types
+
 typedef struct {
 	unsigned int ID;
 } Shader;
 
-#endif
-
-#include "shader.h"
+#Impl
 
 static char* readFile(const char* path) {
 	FILE* file = fopen(path, "rb");

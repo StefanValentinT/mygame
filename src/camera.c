@@ -1,8 +1,10 @@
-#if INTERFACE
+#Imports
 
 #include <cglm/cglm.h>
 #include <stdbool.h>
 #include <math.h>
+
+#Types
 
 typedef enum {
 	FORWARD,
@@ -28,9 +30,7 @@ typedef struct {
 	float zoom;
 } Camera;
 
-#endif
-
-#include "camera.h"
+#Impl
 
 static const float YAW         = -90.0f;
 static const float PITCH       =  0.0f;
