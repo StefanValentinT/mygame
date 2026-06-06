@@ -64,7 +64,7 @@ Camera cameraInitScalar(
 }
 
 Camera cameraDefault(void) {
-	vec3 defaultPos = {0.0f, 0.0f, 0.0f};
+	vec3 defaultPos = {0.0f, 0.0f, 3.0f};
 	vec3 defaultUp = {0.0f, 1.0f, 0.0f};
 	return cameraInit(defaultPos, defaultUp, YAW, PITCH);
 }
@@ -79,20 +79,32 @@ void cameraProcessKeyboard(Camera* cam, Camera_Movement direction, float deltaTi
 	float velocity = cam->movementSpeed * deltaTime;
 	vec3 scaledMove;
 
+	vec3 horizontalFront;
+	horizontalFront[0] = cos(glm_rad(cam->yaw));
+	horizontalFront[1] = 0.0f;
+	horizontalFront[2] = sin(glm_rad(cam->yaw));
+	glm_vec3_norm(horizontalFront);
+
+	vec3 horizontalRight;
+	horizontalRight[0] = -sin(glm_rad(cam->yaw));
+	horizontalRight[1] = 0.0f;
+	horizontalRight[2] = cos(glm_rad(cam->yaw));
+	glm_vec3_norm(horizontalRight);
+
 	if (direction == FORWARD) {
-		glm_vec3_scale(cam->front, velocity, scaledMove);
+		glm_vec3_scale(horizontalFront, velocity, scaledMove);
 		glm_vec3_add(cam->pos, scaledMove, cam->pos);
 	}
 	if (direction == BACKWARD) {
-		glm_vec3_scale(cam->front, velocity, scaledMove);
+		glm_vec3_scale(horizontalFront, velocity, scaledMove);
 		glm_vec3_sub(cam->pos, scaledMove, cam->pos);
 	}
 	if (direction == LEFT) {
-		glm_vec3_scale(cam->right, velocity, scaledMove);
+		glm_vec3_scale(horizontalRight, velocity, scaledMove);
 		glm_vec3_sub(cam->pos, scaledMove, cam->pos);
 	}
 	if (direction == RIGHT) {
-		glm_vec3_scale(cam->right, velocity, scaledMove);
+		glm_vec3_scale(horizontalRight, velocity, scaledMove);
 		glm_vec3_add(cam->pos, scaledMove, cam->pos);
 	}
 	if (direction == UP) {
