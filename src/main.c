@@ -1,4 +1,5 @@
-#Imports
+#ifndef MAIN_H
+#define MAIN_H
 
 #include <stdio.h>
 #include <stdlib.h> 
@@ -8,12 +9,29 @@
 #include <stb/stb_image.h>
 #include <cglm/cglm.h>
 
-#include "shader.h"
-#include "camera.h"
-#include "texture.h"
-#include "mesh.h"
+#include "shader.c"
+#include "camera.c"
+#include "texture.c"
+#include "mesh.c"
+#include "chunk.c"
+#include "block.c"
 
-#Impl
+extern const unsigned int SCR_WIDTH;
+extern const unsigned int SCR_HEIGHT;
+
+int main(void);
+void clearScreen(void);
+GLFWwindow* setup(void);
+void updateDelta(GLFWwindow *window);
+void processInput(GLFWwindow *window);
+void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+void framebuffer_size_callback(GLFWwindow *_window, int width, int height);
+void loadAndRegisterAllBlocks(void);
+int registerBlockTexture(const char* localPath, TextureType type);
+
+#endif
+#if __INCLUDE_LEVEL__ == 0
+
 const unsigned int SCR_WIDTH = 600;
 const unsigned int SCR_HEIGHT = 600;
 
@@ -84,32 +102,22 @@ bool locked = false;
 int main() {
 	GLFWwindow* window = setup();
 
+	loadAndRegisterAllBlocks();
+
 	cam = cameraDefault();
 
 	Shader objectShader = makeShader("shaders/shader.vert", "shaders/shader.frag");
 
-	Texture diffuseTex = loadTexture("res/blocks/grass/grass_block_top.png", TEXTURE_DIFFUSE);
-	Texture normalTex   = loadTexture("res/blocks/grass/grass_block_top_n.png", TEXTURE_NORMAL);
+	Texture diffuseTex = { .ID = BlockRegistry[BLOCK_GRASS].properties.textureIdTop, .type = TEXTURE_DIFFUSE };
+	Texture normalTex  = { .ID = BlockRegistry[BLOCK_GRASS].properties.textureIdTopNormal, .type = TEXTURE_NORMAL };
 	Texture cubeTextures[] = { diffuseTex, normalTex };
 
-	mat4 model;
-	glm_mat4_identity(model);
 	mat4 view;
 	mat4 projection;
 
-	int numInstances = 100 * 100;
-	mat4* cubeMatrices = malloc(numInstances * sizeof(mat4));
-	int index = 0;
-	for (int x = 0; x < 100; x++) {
-		for (int z = 0; z < 100; z++) {
-			glm_mat4_identity(cubeMatrices[index]);
-			glm_translate(cubeMatrices[index], (vec3){(float)x, 0.0f, (float)z});
-			index++;
-		}
-	}
-	Mesh grassCubeMesh = createMesh(cubeVertices, 24, cubeIndices, 36, cubeTextures, 2);
-	setupMeshInstanced(&grassCubeMesh, cubeMatrices, numInstances);
-	free(cubeMatrices);
+	Mesh baseCubeMesh = createMesh(cubeVertices, 24, cubeIndices, 36, cubeTextures, 2);
+	Chunk gameChunk = createChunk();
+	generateChunkMesh(&gameChunk, &baseCubeMesh);
 
 	while (!glfwWindowShouldClose(window)) {
 		updateDelta(window);
@@ -132,7 +140,7 @@ int main() {
 		glm_perspective(glm_rad(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f, projection);
 		setMat4(&objectShader, "projection", projection);
 		
-		drawMeshInstanced(&grassCubeMesh, objectShader.ID, 10000);
+		drawChunk(&gameChunk, objectShader.ID);
 
 		// end render
 
@@ -242,3 +250,5 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 void framebuffer_size_callback(GLFWwindow *_window, int width, int height) {
 	glViewport(0, 0, width, height);
 }
+
+#endif

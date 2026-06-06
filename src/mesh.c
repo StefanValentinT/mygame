@@ -1,4 +1,5 @@
-#Imports
+#ifndef MESH_H
+#define MESH_H
 
 #include <glad/glad.h>
 #include <glfw/glfw3.h>
@@ -7,9 +8,8 @@
 #include <math.h>
 #include <stdlib.h>
 #include <string.h>
-#include "texture.h"
 
-#Types
+#include "texture.c"
 
 typedef struct {
 	vec3 Position;
@@ -32,7 +32,15 @@ typedef struct {
 	unsigned int VAO, VBO, EBO, instanceVBO;
 } Mesh;
 
-#Impl
+Mesh createMesh(Vertex* vertices, int vertexCount, unsigned int* indices, int indexCount, Texture* textures, int textureCount);
+void setupMesh(Mesh* mesh);
+void setupMeshInstanced(Mesh* mesh, mat4* modelMatrices, int instanceCount);
+void drawMesh(Mesh* mesh, unsigned int shaderProgram);
+void drawMeshInstanced(Mesh* mesh, unsigned int shaderProgram, int instanceCount);
+void calculateMeshTangents(Vertex* vertices, int vertexCount, unsigned int* indices, int indexCount);
+
+#endif
+#if __INCLUDE_LEVEL__ == 0
 
 Mesh createMesh(Vertex* vertices, int vertexCount, unsigned int* indices, int indexCount, Texture* textures, int textureCount) {
 	Mesh mesh = {0};
@@ -277,3 +285,5 @@ void calculateMeshTangents(Vertex* vertices, int vertexCount, unsigned int* indi
 	free(tan1);
 	free(tan2);
 }
+
+#endif

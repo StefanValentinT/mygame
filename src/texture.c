@@ -1,9 +1,8 @@
-#Imports
+#ifndef TEXTURE_H
+#define TEXTURE_H
 
 #include <glad/glad.h>
 #include <stb/stb_image.h>
-
-#Types
 
 typedef enum {
 	TEXTURE_DIFFUSE,
@@ -16,7 +15,10 @@ typedef struct {
 	TextureType type;
 } Texture;
 
-#Impl
+Texture loadTexture(char* path, TextureType type);
+
+#endif
+#if __INCLUDE_LEVEL__ == 0
 
 Texture loadTexture(char* path, TextureType type) {
 	int width, height, nrChannels;
@@ -52,3 +54,5 @@ Texture loadTexture(char* path, TextureType type) {
 	stbi_image_free(data);
 	return (Texture){ .ID = texture, .type = type };
 }
+
+#endif

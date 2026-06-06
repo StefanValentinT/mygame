@@ -1,10 +1,9 @@
-#Imports
+#ifndef CAMERA_H
+#define CAMERA_H
 
 #include <cglm/cglm.h>
 #include <stdbool.h>
 #include <math.h>
-
-#Types
 
 typedef enum {
 	FORWARD,
@@ -30,7 +29,20 @@ typedef struct {
 	float zoom;
 } Camera;
 
-#Impl
+Camera cameraInit(vec3 position, vec3 up, float yaw, float pitch);
+Camera cameraInitScalar(
+	float posX,float posY, float posZ,
+	float upX, float upY, float upZ,
+	float yaw, float pitch);
+Camera cameraDefault(void);
+void cameraGetViewMatrix(Camera* cam, mat4 mat);
+void cameraProcessKeyboard(Camera* cam, Camera_Movement direction, float deltaTime);
+void cameraProcessMouseMovement(Camera* cam, float xoffset, float yoffset, bool constrainPitch);
+void cameraProcessMouseMovementConstrained(Camera* cam, float xoffset, float yoffset);
+void cameraUpdateVectors(Camera* cam);
+
+#endif
+#if __INCLUDE_LEVEL__ == 0
 
 static const float YAW         = -90.0f;
 static const float PITCH       =  0.0f;
@@ -148,5 +160,7 @@ void cameraUpdateVectors(Camera* cam){
 	
 	glm_vec3_cross(cam->right, cam->front, cam->up);
 	glm_vec3_norm(cam->up);
-
 }
+
+#endif
+
