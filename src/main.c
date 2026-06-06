@@ -1,3 +1,5 @@
+#if INTERFACE
+
 #include <stdio.h>
 #include <stdlib.h> 
 #include <glad/glad.h>
@@ -5,14 +7,12 @@
 #include <math.h>
 #include <stb/stb_image.h>
 #include <cglm/cglm.h>
+#include "shader.h"
+#include "camera.h"
 
-#include "camera.c"
-#include "shader.c"
+#endif
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-void processInput(GLFWwindow *window);
-void mouse_callback(GLFWwindow* window, double xpos, double ypos);
-void updateDelta(GLFWwindow *window);
+#include "main.h"
 
 const unsigned int SCR_WIDTH = 600;
 const unsigned int SCR_HEIGHT = 600;
@@ -224,6 +224,8 @@ void processInput(GLFWwindow *window) {
 		cameraProcessKeyboard(&cam, RIGHT, deltaTime);
 	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
 		cameraProcessKeyboard(&cam, UP, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS)
+		cameraProcessKeyboard(&cam, DOWN, deltaTime);
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)

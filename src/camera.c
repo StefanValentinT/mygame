@@ -1,5 +1,4 @@
-#ifndef CAMERA
-#define CAMERA
+#if INTERFACE
 
 #include <cglm/cglm.h>
 #include <stdbool.h>
@@ -12,15 +11,9 @@ typedef enum {
 	RIGHT,
 	UP,
 	DOWN
-}  Camera_Movement;
+} Camera_Movement;
 
-static const float YAW         = -90.0f;
-static const float PITCH       =  0.0f;
-static const float SPEED       =  2.5f;
-static const float SENSITIVITY =  0.1f;
-static const float ZOOM        =  45.0f;
-
-typedef struct{
+typedef struct {
 	vec3 pos;
 	vec3 front;  // auto
 	vec3 up;     // auto
@@ -35,21 +28,15 @@ typedef struct{
 	float zoom;
 } Camera;
 
-Camera cameraInit(vec3 position, vec3 up, float yaw, float pitch);
-Camera cameraInitScalar(
-	float posX,float posY, float posZ,
-	float upX, float upY, float upZ,
-	float yaw, float pitch
-);
-Camera cameraDefault();
-void   cameraGetViewMatrix(Camera* cam, mat4 mat);
-void   cameraProcessKeyboard(Camera* cam, Camera_Movement direction, float deltaTime);
-void   cameraProcessMouseMovement(Camera* cam, float xoffset, float yoffset, bool constrainPitch);
-void   cameraProcessMouseMovementConstrained(Camera* cam, float xoffset, float yoffset);
-void   cameraUpdateVectors(Camera* cam);
-
 #endif
-#if __INCLUDE_LEVEL__ == 0
+
+#include "camera.h"
+
+static const float YAW         = -90.0f;
+static const float PITCH       =  0.0f;
+static const float SPEED       =  2.5f;
+static const float SENSITIVITY =  0.1f;
+static const float ZOOM        =  45.0f;
 
 Camera cameraInit(vec3 position, vec3 up, float yaw, float pitch) {
 	Camera cam;
@@ -109,8 +96,12 @@ void cameraProcessKeyboard(Camera* cam, Camera_Movement direction, float deltaTi
 		glm_vec3_add(cam->pos, scaledMove, cam->pos);
 	}
 	if (direction == UP) {
-		glm_vec3_scale(cam->up, velocity, scaledMove);
+		glm_vec3_scale(cam->worldUp, velocity, scaledMove);
 		glm_vec3_add(cam->pos, scaledMove, cam->pos);
+	}
+	if (direction == DOWN) {
+		glm_vec3_scale(cam->worldUp, velocity, scaledMove);
+		glm_vec3_sub(cam->pos, scaledMove, cam->pos);
 	}
 }
 
@@ -147,5 +138,3 @@ void cameraUpdateVectors(Camera* cam){
 	glm_vec3_norm(cam->up);
 
 }
-
-#endif

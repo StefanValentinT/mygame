@@ -1,38 +1,20 @@
-#ifndef SHADER
-#define SHADER
+#if INTERFACE
 
+#include <glad/glad.h>
+#include <glfw/glfw3.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
-#include <glad/glad.h>
 #include <cglm/cglm.h>
 
 typedef struct {
 	unsigned int ID;
 } Shader;
 
-Shader makeShader(const char* vertexPath, const char* fragmentPath);
-void use(const Shader* shader);
-void setBool(const Shader* shader, const char* name, bool value);
-void setInt(const Shader* shader, const char* name, int value);
-void setFloat(const Shader* shader, const char* name, float value);
-void delete(const Shader* shader);
-
-void setVec2(const Shader* shader, const char* name, const vec2 value);
-void setVec3(const Shader* shader, const char* name, const vec3 value);
-void setVec4(const Shader* shader, const char* name, const vec4 value);
-
-void setVec2f(const Shader* shader, const char* name, float x, float y);
-void setVec3f(const Shader* shader, const char* name, float x, float y, float z);
-void setVec4f(const Shader* shader, const char* name, float x, float y, float z, float w);
-
-void setMat2(const Shader* shader, const char* name, const mat2 mat);
-void setMat3(const Shader* shader, const char* name, const mat3 mat);
-void setMat4(const Shader* shader, const char* name, const mat4 mat);
-
 #endif
-#if __INCLUDE_LEVEL__ == 0
+
+#include "shader.h"
 
 static char* readFile(const char* path) {
 	FILE* file = fopen(path, "rb");
@@ -161,5 +143,3 @@ void setMat3(const Shader* shader, const char* name, const mat3 mat) {
 void setMat4(const Shader* shader, const char* name, const mat4 mat) {
 	glUniformMatrix4fv(glGetUniformLocation(shader->ID, name), 1, GL_FALSE, (float*)mat);
 }
-
-#endif
