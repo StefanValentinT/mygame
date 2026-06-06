@@ -14,7 +14,7 @@ SRCS := $(wildcard $(SRC_DIR)/**/*.c) $(wildcard $(SRC_DIR)/*.c) \
 LDFLAGS := $(wildcard $(LIB_DIR)/**/*.a) $(wildcard $(LIB_DIR)/*.a)
 
 LIB_SUBDIRS := $(dir $(wildcard $(LIB_DIR)/**/.)) $(dir $(wildcard $(LIB_DIR)/./))
-INCLUDES := -I$(SRC_DIR) -I$(LIB_DIR) $(addprefix -I,$(LIB_SUBDIRS))
+INCLUDES := -I$(LIB_DIR) $(addprefix -I,$(LIB_SUBDIRS))
 
 .PHONY: all fmt build launch clean
 

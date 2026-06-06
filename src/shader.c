@@ -32,7 +32,6 @@ void setMat3(const Shader* shader, const char* name, const mat3 mat);
 void setMat4(const Shader* shader, const char* name, const mat4 mat);
 
 #endif
-
 #if __INCLUDE_LEVEL__ == 0
 
 static char* readFile(const char* path) {

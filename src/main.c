@@ -6,7 +6,8 @@
 #include <stb/stb_image.h>
 #include <cglm/cglm.h>
 
-#include <shader.c>
+#include "camera.c"
+#include "shader.c"
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -15,9 +16,6 @@ void updateDelta(GLFWwindow *window);
 
 const unsigned int SCR_WIDTH = 600;
 const unsigned int SCR_HEIGHT = 600;
-
-float deltaTime = 0.0f;
-float lastFrame = 0.0f;
 
 float vertices[] = {
 	// positions          // texture coords
@@ -69,15 +67,13 @@ unsigned int indices[] = {
 	0, 2, 3
 };
 
-vec3 cameraPos = {0.0f, 0.0f, 3.0f};
-vec3 cameraFront = {0.0f, 0.0f, -1.0f};
-vec3 cameraUp = {0.0f, 1.0f, 0.0f};
+float deltaTime = 0.0f;
+float lastFrame = 0.0f;
 
+Camera cam;
 bool firstMouse = true;
 float lastX = 300.0f;
 float lastY = 300.0f;
-float yaw   = -90.0f;
-float pitch =   0.0f;
 bool locked = false;
 
 void setup() {
@@ -156,17 +152,17 @@ int main() {
 
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
+	cam = cameraDefault();
+
 	while (!glfwWindowShouldClose(window)) {
 		updateDelta(window);
 
 		processInput(window);
 
 		glm_mat4_identity(model);
+		//glm_rotate(model, (float)glfwGetTime() * glm_rad(50.0f), (vec3){0.5f, 1.0f, 0.0f});
 		glm_mat4_identity(view);
-		glm_rotate(model, (float)glfwGetTime() * glm_rad(50.0f), (vec3){0.5f, 1.0f, 0.0f});
-		vec3 target;
-		glm_vec3_add(cameraPos, cameraFront, target);
-		glm_lookat(cameraPos, target, cameraUp, view);
+		cameraGetViewMatrix(&cam, view);
 
 		glm_perspective(glm_rad(45.0f), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f, projection);
 
@@ -193,17 +189,6 @@ int main() {
 	return 0;
 }
 
-void vec3_mul(vec3 v, float scalar) {
-	v[0] *= scalar;
-	v[1] *= scalar;
-	v[2] *= scalar;
-}
-
-void vec3_add(vec3 a, vec3 b) {
-	a[0] += b[0];
-	a[1] += b[1];
-	a[2] += b[2];
-}
 
 void updateDelta(GLFWwindow *window) {
 	float currentFrame = (float)glfwGetTime();
@@ -229,32 +214,16 @@ void processInput(GLFWwindow *window) {
 		firstMouse = true;
 	}
 	
-	float cameraSpeed = 2.5f * deltaTime;
-	vec3 tempScaled;
-
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
-		glm_vec3_scale(cameraFront, cameraSpeed, tempScaled);
-		glm_vec3_add(cameraPos, tempScaled, cameraPos);
-	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
-		glm_vec3_scale(cameraFront, cameraSpeed, tempScaled);
-		glm_vec3_sub(cameraPos, tempScaled, cameraPos);
-	}
-
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS || glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-		vec3 crossResult;
-		vec3 normResult;
-		glm_cross(cameraFront, cameraUp, crossResult);
-		glm_normalize_to(crossResult, normResult);
-		glm_vec3_scale(normResult, cameraSpeed, tempScaled);
-
-		if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
-			glm_vec3_sub(cameraPos, tempScaled, cameraPos);
-		}
-		if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
-			glm_vec3_add(cameraPos, tempScaled, cameraPos);
-		}
-	}
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
+		cameraProcessKeyboard(&cam, FORWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS)
+		cameraProcessKeyboard(&cam, BACKWARD, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS)
+		cameraProcessKeyboard(&cam, LEFT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS)
+		cameraProcessKeyboard(&cam, RIGHT, deltaTime);
+	if (glfwGetKey(window, GLFW_KEY_SPACE) == GLFW_PRESS)
+		cameraProcessKeyboard(&cam, UP, deltaTime);
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
@@ -272,23 +241,7 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 		lastX = (float)xpos;
 		lastY = (float)ypos;
 
-		float sensitivity = 0.1f;
-		xoffset *= sensitivity;
-		yoffset *= sensitivity;
-
-		yaw   += xoffset;
-		pitch += yoffset;
-
-		if (pitch > 89.0f)
-			pitch = 89.0f;
-		if (pitch < -89.0f)
-			pitch = -89.0f;
-
-		vec3 direction;
-		direction[0] = cosf(glm_rad(yaw)) * cosf(glm_rad(pitch));
-		direction[1] = sinf(glm_rad(pitch));
-		direction[2] = sinf(glm_rad(yaw)) * cosf(glm_rad(pitch));
-		glm_vec3_normalize_to(direction, cameraFront);
+		cameraProcessMouseMovementConstrained(&cam, xoffset, yoffset);
 	}
 }
 
